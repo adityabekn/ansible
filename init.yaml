@@ -1,0 +1,7 @@
+---
+- hosts: server
+  tasks:
+    - name: Ensure chrony is installed
+      apt: 
+        name: chronyd
+        state: present
