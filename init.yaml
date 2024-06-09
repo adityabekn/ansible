@@ -1,7 +1,70 @@
----
-- hosts: server
+- hosts: all
+  vars:
+    user_vars:
+      name: ditbedit
+    ssh_vars:
+      port: 22
   tasks:
-    - name: Ensure chrony is installed
-      apt: 
-        name: chronyd
+    - name: Update apt
+      apt:
+        update_cache: true
+        upgrade: safe
+        autoremove: true
+        clean: yes
+
+    - name: Install sudo
+      apt:
+        name: sudo
         state: present
+
+    - name: Install htop
+      apt:
+        name: htop
+        state: present
+    
+    - name: Install iptables persistent
+      apt:
+        name: iptables-persistent
+        state: present
+    
+    - name: Create a user with a home directory
+      user:
+        name: "{{ user_vars.name }}"
+        groups: sudo
+        shell: /bin/bash
+        password: "{{ '16011998' | password_hash('sha512') }}"
+
+    - name: Add ssh public key to user
+      ansible.posix.authorized_key:
+        user: "{{ user_vars.name }}"
+        state: present
+        key: "{{ lookup('file', 'pub/key.pub') }}"
+
+    - name: Add Docker group
+      group:
+        name: docker
+        state: present
+
+    - name: Add user to Docker group
+      ansible.builtin.user:
+        name: "{{ user_vars.name }}"
+        groups: docker
+        append: true
+
+    - name: Add Iptables input to loopback
+      shell: iptables -A INPUT -i lo -j ACCEPT
+
+    - name: Add Iptables established connection
+      shell: iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+    - name: Add Iptables ssh port 
+      shell: iptables -A INPUT -p tcp --dport {{ ssh_vars.port }} -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+
+    - name: Change Iptables policy input to Drop
+      shell: iptables --policy INPUT DROP
+
+    - name: Save Iptables to persistent
+      shell: netfilter-persistent save
+
+    - name: Reboot System
+      ansible.builtin.reboot:
