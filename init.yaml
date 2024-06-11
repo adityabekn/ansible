@@ -1,7 +1,15 @@
 - hosts: all
+  vars_prompt:
+    - name: username
+      prompt: What is your username?
+      private: false
+    
+    - name: password
+      prompt: What is your password?
+      private: true
+      encrypt: sha512_crypt
+      confirm: true
   vars:
-    user_vars:
-      name: ditbedit
     ssh_vars:
       port: 22
   tasks:
@@ -27,16 +35,16 @@
         name: iptables-persistent
         state: present
     
-    - name: Create a user with a home directory
+    - name: Create a user {{ username }} with a home directory
       user:
-        name: "{{ user_vars.name }}"
+        name: "{{ username }}"
         groups: sudo
         shell: /bin/bash
-        password: "{{ '16011998' | password_hash('sha512') }}"
+        password: "{{ password }}"
 
     - name: Add ssh public key to user
       ansible.posix.authorized_key:
-        user: "{{ user_vars.name }}"
+        user: "{{ username }}"
         state: present
         key: "{{ lookup('file', 'pub/key.pub') }}"
 
@@ -47,7 +55,7 @@
 
     - name: Add user to Docker group
       ansible.builtin.user:
-        name: "{{ user_vars.name }}"
+        name: "{{ username }}"
         groups: docker
         append: true
 
@@ -66,5 +74,32 @@
     - name: Save Iptables to persistent
       shell: netfilter-persistent save
 
-    - name: Reboot System
-      ansible.builtin.reboot:
+    - name: Replace Port in sshd_config
+      lineinfile:
+        path: "/etc/ssh/sshd_config"
+        regex: ^(# *)?Port
+        line: Port {{ ssh_vars.port }}
+    
+    - name: Replace PermitRootLogin in sshd_config
+      lineinfile:
+        path: "/etc/ssh/sshd_config"
+        regex: ^(# *)?PermitRootLogin (yes|without-password|forced-commands-only|no)
+        line: PermitRootLogin no
+
+    - name: Replace PasswordAuthentication in sshd_config
+      lineinfile:
+        path: "/etc/ssh/sshd_config"
+        regex: ^(# *)?PasswordAuthentication (yes|no)
+        line: PasswordAuthentication no
+
+    - name: Replace LoginGraceTime in sshd_config
+      lineinfile:
+        path: "/etc/ssh/sshd_config"
+        regex: ^(# *)?LoginGraceTime
+        line: LoginGraceTime 1m
+
+    - name: Replace MaxAuthTries in sshd_config
+      lineinfile:
+        path: "/etc/ssh/sshd_config"
+        regex: ^(# *)?MaxAuthTries
+        line: MaxAuthTries 3

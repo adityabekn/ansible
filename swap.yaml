@@ -33,6 +33,3 @@
 
     - name: Append configuration in /etc/sysctl.conf
       shell: echo "\nvm.swappiness={{ swap_vars.swappiness }}\n" >> /etc/sysctl.conf
-    
-    - name: Reboot System
-      ansible.builtin.reboot:
