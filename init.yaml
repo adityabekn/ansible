@@ -19,21 +19,6 @@
         upgrade: safe
         autoremove: true
         clean: yes
-
-    - name: Install sudo
-      apt:
-        name: sudo
-        state: present
-
-    - name: Install htop
-      apt:
-        name: htop
-        state: present
-    
-    - name: Install iptables persistent
-      apt:
-        name: iptables-persistent
-        state: present
     
     - name: Create a user {{ username }} with a home directory
       user:
@@ -58,48 +43,3 @@
         name: "{{ username }}"
         groups: docker
         append: true
-
-    - name: Add Iptables input to loopback
-      shell: iptables -A INPUT -i lo -j ACCEPT
-
-    - name: Add Iptables established connection
-      shell: iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-
-    - name: Add Iptables ssh port 
-      shell: iptables -A INPUT -p tcp --dport {{ ssh_vars.port }} -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
-
-    - name: Change Iptables policy input to Drop
-      shell: iptables --policy INPUT DROP
-
-    - name: Save Iptables to persistent
-      shell: netfilter-persistent save
-
-    - name: Replace Port in sshd_config
-      lineinfile:
-        path: "/etc/ssh/sshd_config"
-        regex: ^(# *)?Port
-        line: Port {{ ssh_vars.port }}
-    
-    - name: Replace PermitRootLogin in sshd_config
-      lineinfile:
-        path: "/etc/ssh/sshd_config"
-        regex: ^(# *)?PermitRootLogin (yes|without-password|forced-commands-only|no)
-        line: PermitRootLogin no
-
-    - name: Replace PasswordAuthentication in sshd_config
-      lineinfile:
-        path: "/etc/ssh/sshd_config"
-        regex: ^(# *)?PasswordAuthentication (yes|no)
-        line: PasswordAuthentication no
-
-    - name: Replace LoginGraceTime in sshd_config
-      lineinfile:
-        path: "/etc/ssh/sshd_config"
-        regex: ^(# *)?LoginGraceTime
-        line: LoginGraceTime 1m
-
-    - name: Replace MaxAuthTries in sshd_config
-      lineinfile:
-        path: "/etc/ssh/sshd_config"
-        regex: ^(# *)?MaxAuthTries
-        line: MaxAuthTries 3

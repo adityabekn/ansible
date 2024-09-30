@@ -10,6 +10,7 @@
         upgrade: safe
         autoremove: true
         clean: yes
+      become: true
 
     - name: Install required docker packages
       apt:
@@ -17,24 +18,28 @@
           - ca-certificates
           - curl
           - gnupg
+      become: true
 
     - name: Create directory for Docker's GPG key
       file:
         path: /etc/apt/keyrings
         state: directory
         mode: '0755'
+      become: true
 
     - name: Add Docker's official GPG key
       ansible.builtin.apt_key:
         url: https://download.docker.com/linux/debian/gpg
         keyring: /etc/apt/keyrings/docker.gpg
         state: present
+      become: true
 
     - name: Add Docker repository
       ansible.builtin.apt_repository:
         repo: "deb [arch={{ arch_mapping[ansible_architecture] }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable"
         filename: docker
         state: present
+      become: true
 
     - name: Install Docker and related packages
       ansible.builtin.apt:
@@ -46,3 +51,4 @@
           - docker-compose-plugin
         state: present
         update_cache: true
+      become: true

@@ -8,28 +8,36 @@
       register: idCheckSwap
       stat:
         path: /swapfile
+      become: true
 
     - name: Fail it if "/swapfile" exists
       fail:
         msg: Swap file exists
       when: idCheckSwap.stat.exists == true
+      become: true
 
     - name: Allocate the swap file
       shell: fallocate -l {{ swap_vars.size }} /swapfile
+      become: true
 
     - name: Change permission of the swap file
       file:
         path: /swapfile
         mode: 600
+      become: true
 
     - name: Create a swap area on the swap file
       shell: mkswap /swapfile
+      become: true
 
     - name: Activate the swap file as a swap memory
       shell: swapon /swapfile
+      become: true
 
     - name: Append configuration in /etc/fstab
       shell: echo "\n/swapfile none swap sw 0 0\n" >> /etc/fstab
+      become: true
 
     - name: Append configuration in /etc/sysctl.conf
       shell: echo "\nvm.swappiness={{ swap_vars.swappiness }}\n" >> /etc/sysctl.conf
+      become: true
