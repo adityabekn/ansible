@@ -1,1 +1,1 @@
-Add Public Key Here with .pub
+Add Public Key Here with key.pub

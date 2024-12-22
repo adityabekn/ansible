@@ -1,0 +1,6 @@
+[server]
+103.127.134.8 ansible_port=221
+
+[server:vars]
+ansible_connection=ssh
+ansible_user=ditbedit
