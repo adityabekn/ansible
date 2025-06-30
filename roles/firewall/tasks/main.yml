@@ -22,11 +22,11 @@
         }
       }
 
-- name: Enable and start nftables
-  systemd:
-    name: nftables
-    enabled: true
-    state: started
-
-- name: Reload nftables rules
-  command: nft -f /etc/nftables.conf
+#- name: Enable and start nftables
+#  systemd:
+#    name: nftables
+#    enabled: true
+#    state: started
+#
+#- name: Reload nftables rules
+#  command: nft -f /etc/nftables.conf

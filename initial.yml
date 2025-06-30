@@ -23,7 +23,6 @@
       aarch64: arm64
     public_keys:
       - files/id_rsa.pub
-      - files/key.pub
 
   roles:
     - common
