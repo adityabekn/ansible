@@ -1,0 +1,32 @@
+- name: Install nftables
+  apt:
+    name: nftables
+    state: present
+
+- name: Set up basic nftables rules
+  copy:
+    dest: /etc/nftables.conf
+    content: |
+      table inet filter {
+        chain input {
+          type filter hook input priority 0; policy drop;
+          iif "lo" accept
+          ct state established,related accept
+          tcp dport {{ sshport }} ct state new,established accept
+        }
+        chain forward {
+          type filter hook forward priority 0; policy drop;
+        }
+        chain output {
+          type filter hook output priority 0; policy accept;
+        }
+      }
+
+- name: Enable and start nftables
+  systemd:
+    name: nftables
+    enabled: true
+    state: started
+
+- name: Reload nftables rules
+  command: nft -f /etc/nftables.conf

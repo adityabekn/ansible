@@ -1,0 +1,55 @@
+- name: Update apt
+  apt:
+    update_cache: true
+    upgrade: safe
+    autoremove: true
+    clean: yes
+
+- name: Install required docker packages
+  apt:
+    pkg:
+      - ca-certificates
+      - curl
+      - gnupg
+
+- name: Create directory for Docker's GPG key
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Add Docker's official GPG key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    keyring: /etc/apt/keyrings/docker.gpg
+    state: present
+
+- name: Add Docker repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ arch_mapping[ansible_architecture] | default('amd64') }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable"
+    filename: docker
+    state: present
+
+- name: Install Docker and related packages
+  ansible.builtin.apt:
+    pkg:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+
+- name: Ensure docker group exists
+  group:
+    name: docker
+    state: present
+  when: username | default('') | length > 0
+
+- name: Add user to docker group
+  user:
+    name: "{{ username }}"
+    groups: docker
+    append: true
+  when: username | default('') | length > 0

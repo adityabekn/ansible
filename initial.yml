@@ -1,0 +1,34 @@
+- hosts: all
+  become: true
+
+  vars_prompt:
+    - name: sshport
+      prompt: What is your SSH port?
+      private: false
+      default: '22'
+    - name: username
+      prompt: What is your username?
+      private: false
+    - name: user_password
+      prompt: What is your password?
+      private: true
+      encrypt: sha512_crypt
+      confirm: true
+
+  vars:
+    swap_size: 2G
+    swap_swappiness: 10
+    arch_mapping:
+      x86_64: amd64
+      aarch64: arm64
+    public_keys:
+      - files/id_rsa.pub
+      - files/key.pub
+
+  roles:
+    - common
+    - create-user
+    - ssh
+    - firewall
+    - docker
+    - swap

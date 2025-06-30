@@ -1,0 +1,45 @@
+- name: Set SSH port
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?Port '
+    line: "Port {{ sshport }}"
+    state: present
+    validate: sshd -t -f %s
+
+- name: Disable root SSH login
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin '
+    line: "PermitRootLogin no"
+    state: present
+    validate: sshd -t -f %s
+
+- name: Disable password SSH login
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication '
+    line: "PasswordAuthentication no"
+    state: present
+    validate: sshd -t -f %s
+
+- name: Set SSHD LoginGraceTime
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?LoginGraceTime '
+    line: "LoginGraceTime 1m"
+    state: present
+    validate: sshd -t -f %s
+
+- name: Set SSHD MaxAuthTries
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?MaxAuthTries '
+    line: "MaxAuthTries 3"
+    state: present
+    validate: sshd -t -f %s
+
+- name: Restart SSH service (systemd)
+  service:
+    name: ssh
+    state: restarted
+  when: ansible_service_mgr == 'systemd'
