@@ -1,0 +1,15 @@
+- hosts: all
+  become: true
+
+  vars_prompt:
+    - name: username
+      prompt: What is your username?
+      private: false
+
+  vars:
+    swap_size: 2G
+    swap_swappiness: 10
+
+  roles:
+    - docker
+    - swap

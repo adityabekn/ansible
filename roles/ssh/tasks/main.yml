@@ -4,7 +4,6 @@
     regexp: '^#?Port '
     line: "Port {{ sshport }}"
     state: present
-    validate: sshd -t -f %s
 
 - name: Disable root SSH login
   lineinfile:
@@ -12,7 +11,6 @@
     regexp: '^#?PermitRootLogin '
     line: "PermitRootLogin no"
     state: present
-    validate: sshd -t -f %s
 
 - name: Disable password SSH login
   lineinfile:
@@ -20,7 +18,6 @@
     regexp: '^#?PasswordAuthentication '
     line: "PasswordAuthentication no"
     state: present
-    validate: sshd -t -f %s
 
 - name: Set SSHD LoginGraceTime
   lineinfile:
@@ -28,7 +25,6 @@
     regexp: '^#?LoginGraceTime '
     line: "LoginGraceTime 1m"
     state: present
-    validate: sshd -t -f %s
 
 - name: Set SSHD MaxAuthTries
   lineinfile:
@@ -36,10 +32,3 @@
     regexp: '^#?MaxAuthTries '
     line: "MaxAuthTries 3"
     state: present
-    validate: sshd -t -f %s
-
-#- name: Restart SSH service (systemd)
-#  service:
-#    name: ssh
-#    state: restarted
-#  when: ansible_service_mgr == 'systemd'

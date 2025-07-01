@@ -1,23 +1,25 @@
 - hosts: all
   become: true
+  become_method: su
+  become_user: root
 
   vars_prompt:
-    - name: sshport
-      prompt: What is your SSH port?
-      private: false
-      default: '22'
     - name: username
-      prompt: What is your username?
+      prompt: what is your username?
       private: false
+
     - name: user_password
-      prompt: What is your password?
+      prompt: what is your password?
       private: true
       encrypt: sha512_crypt
       confirm: true
 
+    - name: sshport
+      prompt: what is your SSH port?
+      private: false
+      default: '22'
+
   vars:
-    swap_size: 2G
-    swap_swappiness: 10
     arch_mapping:
       x86_64: amd64
       aarch64: arm64
@@ -29,5 +31,3 @@
     - create-user
     - ssh
     - firewall
-    - docker
-    - swap

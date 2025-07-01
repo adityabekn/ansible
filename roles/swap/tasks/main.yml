@@ -1,3 +1,21 @@
+- name: Ensure util-linux is installed (provides mkswap)
+  apt:
+    name: util-linux
+    state: present
+    update_cache: yes
+
+- name: Find mkswap command
+  ansible.builtin.command: "which mkswap"
+  register: mkswap_path
+  changed_when: false
+  ignore_errors: true
+
+- name: Find swapon command
+  ansible.builtin.command: "which swapon"
+  register: swapon_path
+  changed_when: false
+  ignore_errors: true
+
 - name: Check if /swapfile exists
   stat:
     path: /swapfile
@@ -18,11 +36,11 @@
     mode: '0600'
 
 - name: Format the swap file
-  command: mkswap /swapfile
+  command: "{{ mkswap_path.stdout | default('/sbin/mkswap') }} /swapfile"
   when: not swapfile_stat.stat.exists
 
 - name: Enable the swap file
-  command: swapon /swapfile
+  command: "{{ swapon_path.stdout | default('/sbin/swapon') }} /swapfile"
   when: not swapfile_stat.stat.exists
 
 - name: Ensure swap file entry is present in /etc/fstab

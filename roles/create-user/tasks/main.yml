@@ -13,7 +13,7 @@
     password: "{{ user_password }}"
     state: present
     create_home: yes
-  when: username is defined and user_password is defined
+  when: username | default('') | length > 0
 
 - name: Add SSH public key to user
   ansible.posix.authorized_key:
@@ -22,4 +22,4 @@
     key: "{{ lookup('file', item) }}"
   with_items:
     - "{{ public_keys }}"
-  when: public_keys is defined and username is defined
+  when: public_keys is defined and username | default('') | length > 0
