@@ -1,13 +1,18 @@
 - hosts: all
   become: true
+  become_method: su
+  become_user: root
 
   vars_prompt:
     - name: username
       prompt: What is your username?
       private: false
+    - name: swap_size
+      prompt: How much for swap size?
+      private: false
+      default: '2GB'
 
   vars:
-    swap_size: 2G
     swap_swappiness: 10
 
   roles:

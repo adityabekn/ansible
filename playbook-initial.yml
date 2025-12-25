@@ -1,0 +1,15 @@
+- hosts: all
+  become: true
+  become_method: sudo
+  become_user: root
+
+  vars_prompt:
+    - name: sshport
+      prompt: what is your SSH port?
+      private: false
+      default: '22'
+
+  roles:
+    - common
+    - ssh
+    - firewall

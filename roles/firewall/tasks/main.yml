@@ -15,7 +15,7 @@
           tcp dport {{ sshport }} ct state new,established accept
         }
         chain forward {
-          type filter hook forward priority 0; policy drop;
+          type filter hook forward priority 0; policy accept;
         }
         chain output {
           type filter hook output priority 0; policy accept;

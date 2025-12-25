@@ -1,38 +1,49 @@
-- name: Update apt
-  apt:
-    update_cache: true
-    upgrade: safe
-    autoremove: true
-    clean: yes
+- name: Ensure lsb_release is available (for ansible_lsb)
+  ansible.builtin.apt:
+    name: lsb-release
+    state: present
 
-- name: Install required docker packages
-  apt:
-    pkg:
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install packages required for Docker repository
+  ansible.builtin.apt:
+    name:
       - ca-certificates
       - curl
-      - gnupg
+    state: present
 
 - name: Create directory for Docker's GPG key
-  file:
+  ansible.builtin.file:
     path: /etc/apt/keyrings
     state: directory
     mode: "0755"
 
-- name: Add Docker's official GPG key
-  ansible.builtin.apt_key:
+- name: Download Docker GPG key
+  ansible.builtin.get_url:
     url: https://download.docker.com/linux/debian/gpg
-    keyring: /etc/apt/keyrings/docker.gpg
-    state: present
+    dest: /etc/apt/keyrings/docker.asc
+    mode: "0644"
 
-- name: Add Docker repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch={{ arch_mapping[ansible_architecture] | default('amd64') }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable"
-    filename: docker
-    state: present
+- name: Add Docker repository (deb822 format)
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/docker.sources
+    mode: "0644"
+    content: |
+      Types: deb
+      URIs: https://download.docker.com/linux/debian
+      Suites: {{ ansible_lsb.codename }}
+      Components: stable
+      Signed-By: /etc/apt/keyrings/docker.asc
 
-- name: Install Docker and related packages
+- name: Update apt cache after adding Docker repo
   ansible.builtin.apt:
-    pkg:
+    update_cache: true
+
+- name: Install Docker engine and related packages
+  ansible.builtin.apt:
+    name:
       - docker-ce
       - docker-ce-cli
       - containerd.io

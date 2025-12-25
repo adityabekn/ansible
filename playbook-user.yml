@@ -14,20 +14,9 @@
       encrypt: sha512_crypt
       confirm: true
 
-    - name: sshport
-      prompt: what is your SSH port?
-      private: false
-      default: '22'
-
   vars:
-    arch_mapping:
-      x86_64: amd64
-      aarch64: arm64
     public_keys:
       - files/id_rsa.pub
 
   roles:
-    - common
     - create-user
-    - ssh
-    - firewall
